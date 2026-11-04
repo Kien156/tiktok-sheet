@@ -1,0 +1,23 @@
+name: cap-nhat-tiktok
+on:
+  schedule:
+    - cron: "7,37 * * * *"
+  workflow_dispatch: {}
+concurrency: { group: tiktok, cancel-in-progress: false }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ hashFiles('package.json') }}
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: node run.mjs
+        env:
+          GSHEET_URL: ${{ secrets.GSHEET_URL }}
